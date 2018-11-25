@@ -176,10 +176,12 @@ The modeling process I used is backwards elimimation, which first fits a multipl
 # Final linear model selected
 prop_fit_lm = lm(bwt ~ babysex + bhead + blength + delwt + gaweeks + mheight + mrace + parity + ppwt + smoken, data = tidy_birth_data)
 
+summary(prop_fit_lm)
+
 # Construct plot of residuals vs. fitted values
 tidy_birth_data %>% 
-  modelr::add_predictions(prop_fit_lm) %>% 
-  modelr::add_residuals(prop_fit_lm) %>% 
+  add_predictions(prop_fit_lm) %>% 
+  add_residuals(prop_fit_lm) %>% 
   ggplot(aes(x = pred, y = resid)) +
   geom_point(alpha = .5) +
   labs (
@@ -190,8 +192,32 @@ tidy_birth_data %>%
 
 ```
 
-```{r}
+### Compare model with 2 others
+#### Build the 2 models and display coefficients for predictors
+```{r models}
+# Construct the other 2 models as directed
+comp_lm_2 = lm(bwt ~ blength + gaweeks, data = tidy_birth_data)
+comp_lm_3 = lm(bwt ~ bhead + blength + babysex + bhead * blength + bhead * babysex + blength * babysex + bhead * blength * babysex, data = tidy_birth_data)
 
+summary(comp_lm_2)
+summary(comp_lm_3)
+ 
+```
+#### Cross Validation for Prediction Error
+```{r cv}
+# Perform crossv_mc function
+cv_df = crossv_mc(tidy_birth_data, 100) %>% 
+  mutate(train = map(train, as_tibble), test = map(test, as_tibble))
+
+# Fit models to training data and obtain corresponding RMSEs for testing data
+cv_df = cv_df %>% 
+  mutate(prop_fit_lm = map(train, ~lm(bwt ~ babysex + bhead + blength + delwt + gaweeks + mheight + mrace + parity + ppwt + smoken, data = .x)), 
+         comp_lm_2 = map(train, ~lm(bwt ~ blength + gaweeks, data = .x)), 
+         comp_lm_3 = map(train, ~lm(bwt ~ bhead + blength + babysex + bhead * blength + bhead * babysex + blength * babysex + bhead * blength * babysex, data = .x))) %>% 
+  mutate(rmse_self = map2_dbl(prop_fit_lm, test, ~rmse(model = .x, data = .y)),
+         rmse2 = map2_dbl(comp_lm_2, test, ~rmse(model = .x, data = .y)),
+         rmse3 = map2_dbl(comp_lm_3, test, ~rmse(model = .x, data = .y)))
+  
 ```
 
 
