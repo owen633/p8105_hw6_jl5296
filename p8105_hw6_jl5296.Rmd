@@ -45,13 +45,41 @@ new_hom_data2 = new_hom_data1 %>%
   filter(city_state != "Dallas,TX", city_state != "Phoenix,AZ", city_state != "Kansas City,MO", city_state != "Tulsa,AL")
 
 ```
-#### Modifiy victim_race to have categories white and  non-white, with white as the reference category. Make sure that victim_age is a numeric variable.
+#### Modifiy victim_race to have categories white and non-white, with white as the reference category. Make sure that victim_age is a numeric variable.
 
 ```{r manipuate_data}
 final_hom_data = new_hom_data2 %>% 
-  mutate(victim_race = ifelse(victim_race == "White", "White", "Non-White"),   victim_race = fct_relevel(victim_race, ref = "White")) %>% 
+  mutate(victim_race = ifelse(victim_race == "White", "White", "Non-White"),
+  # Make 'White' as the reference category
+  victim_race = fct_relevel(victim_race, ref = "White")) %>% 
+  # Convert 'victim_age' into numeric
   mutate(victim_age = as.numeric(victim_age))
 
 head(final_hom_data, n = 10)
+
+```
+### Baltimore, MD Linear Model Analysis
+#### Fit logistic regression with resolved vs unresolved as the outcome and victim age, sex and race as predictors.
+
+```{r baltimore_glm}
+balt_data = final_hom_data %>% 
+  filter(city_state == "Baltimore,MD")
+
+# Save output as R object
+fit_glm_balt = balt_data %>% 
+  glm(bin_solved ~ victim_age + victim_sex + victim_race, data = ., family = binomial())
+
+```
+#### Apply broom::tidy to the object and extract estimate and confidence interval of the adjusted odds ratio
+
+```{r baltimore_est_ci}
+fit_glm_balt %>% 
+  broom::tidy() %>% 
+  # Transform log 'Odds Ratio' back
+  mutate(OR = exp(estimate), low_CI = exp(estimate - std.error*1.96), high_CI = exp(estimate + std.error*1.96)) %>% 
+  select(term, OR, low_CI, high_CI, p.value) %>% 
+  filter(term == "victim_raceNon-White") %>% 
+  knitr::kable(digits = 3)
+
 ```
 
