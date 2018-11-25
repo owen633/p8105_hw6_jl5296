@@ -20,7 +20,9 @@ theme_set(theme_bw() + theme(legend.position = "bottom"))
 ```
 
 ## Problem 1
-### Load in dataset
+### Homicide Data in Major US Cities
+
+####Load in dataset
 
 ```{r import_raw_data, message=FALSE}
 raw_hom_data = read.csv("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv")
@@ -130,4 +132,27 @@ fit_glm_all %>%
 **Comments**: Looking at the estimated ORs, Boston has the least value suggesting that cases in this city involving non-white victims have the lowest chance of being solved than those involving white residents among the all cities in the dataset. Furthermore, the majority of the cities have ORs less than 1, indicating the possibility that homicides done to non-white subjects are at lower odds of being resolved compared with those done to white people in most places. There are 3 cities in which the adjusted ORs are above 1, Birmingham, Durham, Tampa, meaning that these areas probably have opposite phenomenons, that crimes with white victims have less likelihood of being solved.
 
 However, we cannot be entirely sure that the findings are true since by examining the constructed condifence intervals, the intervals for some cities do include the null hypothesized value 1, which signals no association. For these places, we need to investigage their individual p-values to determine whether the estimates are statistically significant or not.
+
+
+## Problem 2
+### Variables that affect Child's Birthweight
+
+#### Load and Clean Dataset
+```{r read_clean_data, message=FALSE}
+raw_birth_data = read_csv("./data/birthweight.csv")
+
+# Check for missing values
+raw_birth_data[!complete.cases(raw_birth_data),]
+
+# Convert numeric to factor where appropriate
+tidy_birth_data = raw_birth_data %>% 
+  mutate(babysex = as.factor(babysex), frace = as.factor(frace), mrace = as.factor(mrace), malform = as.factor(malform))
+
+head(tidy_birth_data, n = 10)
+  
+
+```
+**Note**: The line of code checking for NAs outputs 0 rows, which indicates that the data does not contain missing values.
+
+#### Propose regression model for birthweight
 
