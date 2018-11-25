@@ -21,3 +21,18 @@ theme_set(theme_bw() + theme(legend.position = "bottom"))
 
 ```
 
+## Problem 1
+### Load in dataset
+
+```{r import_raw_data}
+raw_hom_data = read.csv("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv")
+
+# Display first few rows of raw dataset
+head(raw_hom_data)
+```
+#### Create city_state variable and binary variable indicating whether the homicide is solved
+```{r }
+
+```
+
+
