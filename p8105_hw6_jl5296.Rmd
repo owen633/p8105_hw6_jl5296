@@ -6,7 +6,6 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 
@@ -18,21 +17,41 @@ knitr::opts_chunk$set(
 
 theme_set(theme_bw() + theme(legend.position = "bottom"))
 
-
 ```
 
 ## Problem 1
 ### Load in dataset
 
-```{r import_raw_data}
+```{r import_raw_data, message=FALSE}
 raw_hom_data = read.csv("https://raw.githubusercontent.com/washingtonpost/data-homicides/master/homicide-data.csv")
 
-# Display first few rows of raw dataset
 head(raw_hom_data)
+
 ```
+
 #### Create city_state variable and binary variable indicating whether the homicide is solved
-```{r }
+
+```{r mutate_data}
+new_hom_data1 = raw_hom_data %>% 
+  unite(city, state, col = "city_state", sep = ",") %>% 
+  mutate(bin_solved = ifelse(disposition == "Closed without arrest" | disposition == "Open/No arrest", 0, 1))
 
 ```
+**Note**: '0' = crime unsolved; '1' = crime solved
 
+#### Omit cities Dallas, TX; Phoenix, AZ; and Kansas City, MO – these don’t report victim race. Also omit Tulsa, AL – this is a data entry mistake
+```{r filter_data}
+new_hom_data2 = new_hom_data1 %>% 
+  filter(city_state != "Dallas,TX", city_state != "Phoenix,AZ", city_state != "Kansas City,MO", city_state != "Tulsa,AL")
+
+```
+#### Modifiy victim_race to have categories white and  non-white, with white as the reference category. Make sure that victim_age is a numeric variable.
+
+```{r manipuate_data}
+final_hom_data = new_hom_data2 %>% 
+  mutate(victim_race = ifelse(victim_race == "White", "White", "Non-White"),   victim_race = fct_relevel(victim_race, ref = "White")) %>% 
+  mutate(victim_age = as.numeric(victim_age))
+
+head(final_hom_data, n = 10)
+```
 
