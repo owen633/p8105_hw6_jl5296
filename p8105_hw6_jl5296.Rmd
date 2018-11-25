@@ -8,6 +8,7 @@ output: github_document
 ```{r setup, include=FALSE}
 
 library(tidyverse)
+library(modelr)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -155,4 +156,43 @@ head(tidy_birth_data, n = 10)
 **Note**: The line of code checking for NAs outputs 0 rows, which indicates that the data does not contain missing values.
 
 #### Propose regression model for birthweight
+```{r backward_eli, eval=FALSE}
+# Backward elimination
+fit_all = lm(bwt ~ ., data = tidy_birth_data)
+summary(fit_all)
+step1 = update(fit_all, . ~ . -malform)
+summary(step1)
+step2 = update(step1, . ~ . -ppbmi)
+summary(step2)
+step3 = update(step2, . ~ . -frace)
+summary(step3)
+
+# Repeat process a number of times to select desirable model
+```
+The modeling process I used is backwards elimimation, which first fits a multiple linear regression model for all variables, then removing the non-significant ones(p-value > 0.05) one at a time starting with the highest one. Eventually, the predictors that I chose to keep in my model are 'babysex', 'head circumference', 'length', 'mother's weight', 'gestational age', 'mother's height', 'mother's race', 'parity', 'mother's pre-pregnancy weight', and 'smoking status'.
+
+#### Show a plot of model residuals against fitted values
+```{r resid_fit_plot}
+# Final linear model selected
+prop_fit_lm = lm(bwt ~ babysex + bhead + blength + delwt + gaweeks + mheight + mrace + parity + ppwt + smoken, data = tidy_birth_data)
+
+# Construct plot of residuals vs. fitted values
+tidy_birth_data %>% 
+  modelr::add_predictions(prop_fit_lm) %>% 
+  modelr::add_residuals(prop_fit_lm) %>% 
+  ggplot(aes(x = pred, y = resid)) +
+  geom_point(alpha = .5) +
+  labs (
+    title = "Rediduals vs. Fitted Values",
+     x = "Fitted Values",
+     y = "Residuals" )
+  
+
+```
+
+```{r}
+
+```
+
+
 
