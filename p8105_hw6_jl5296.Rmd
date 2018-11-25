@@ -75,11 +75,36 @@ fit_glm_balt = balt_data %>%
 ```{r baltimore_est_ci}
 fit_glm_balt %>% 
   broom::tidy() %>% 
-  # Transform log 'Odds Ratio' back
+  # Transform log 'Odds Ratio' back; calculate 95% CIs
   mutate(OR = exp(estimate), low_CI = exp(estimate - std.error*1.96), high_CI = exp(estimate + std.error*1.96)) %>% 
   select(term, OR, low_CI, high_CI, p.value) %>% 
+  # Compare 'non-white' to 'white victims'
   filter(term == "victim_raceNon-White") %>% 
   knitr::kable(digits = 3)
+
+```
+**Interpretation**: We can be 95% confident that the odds of resolving a homicide case is between 0.322 and 0.637 times among *non-white* victims than that of *white* victims.
+
+### All City Analysis
+#### Run logistic regression for each of the cities; extract the adjusted odds ratio (and CI) for solving homicides comparing non-white victims to white victims
+
+```{r glm_all}
+fit_glm_all = final_hom_data %>% 
+  group_by(city_state) %>% 
+  # Generate list column
+  nest() %>% 
+  # Perform glm and broom;tidy for each city
+  mutate(logis_model = map(data, ~glm(bin_solved ~ victim_age + victim_sex + victim_race, data = ., family = binomial())), logis_model = map(logis_model, broom::tidy)) %>% 
+  select(-data) %>% 
+  unnest() %>% 
+  # Obtain odds ratio and compute 95% confidence intervals
+  mutate(OR = exp(estimate), low_CI = exp(estimate - std.error*1.96), high_CI = exp(estimate + std.error*1.96)) %>% 
+  select(city_state, term, OR, low_CI, high_CI, p.value) %>% 
+  filter(term == "victim_raceNon-White")
+
+head(fit_glm_all, n = 10) %>% 
+  knitr::kable(digits = 3)
+  
 
 ```
 
