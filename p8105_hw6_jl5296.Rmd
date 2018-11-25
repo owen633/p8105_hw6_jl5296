@@ -83,6 +83,8 @@ fit_glm_balt %>%
   knitr::kable(digits = 3)
 
 ```
+
+
 **Interpretation**: We can be 95% confident that the odds of resolving a homicide case is between 0.322 and 0.637 times among *non-white* victims than that of *white* victims.
 
 ### All City Analysis
@@ -125,5 +127,7 @@ fit_glm_all %>%
   )
 
 ```
+**Comments**: Looking at the estimated ORs, Boston has the least value suggesting that cases in this city involving non-white victims have the lowest chance of being solved than those involving white residents among the all cities in the dataset. Furthermore, the majority of the cities have ORs less than 1, indicating the possibility that homicides done to non-white subjects are at lower odds of being resolved compared with those done to white people in most places. There are 3 cities in which the adjusted ORs are above 1, Birmingham, Durham, Tampa, meaning that these areas probably have opposite phenomenons, that crimes with white victims have less likelihood of being solved.
 
+However, we cannot be entirely sure that the findings are true since by examining the constructed condifence intervals, the intervals for some cities do include the null hypothesized value 1, which signals no association. For these places, we need to investigage their individual p-values to determine whether the estimates are statistically significant or not.
 
