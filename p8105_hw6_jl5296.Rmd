@@ -229,6 +229,6 @@ cv_df %>%
   ggplot(aes(x = model, y = rmse))+
   geom_violin()
 ```
-
+**Comment**: Based on the plot, since my own proposed model has the lowest rmse value among the 3 candidates, I would pick this one as the best fit.
 
 
