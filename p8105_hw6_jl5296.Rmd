@@ -192,6 +192,8 @@ tidy_birth_data %>%
 
 ```
 
+From the plot, most of the residual values are scattered around '0' with no apparent pattern, which indicates a good chance of equal variance. However, there are some unusual points that deviates from the horizontal line across '0' suggesting the possibility of potential outliers.
+
 ### Compare model with 2 others
 #### Build the 2 models and display coefficients for predictors
 ```{r models}
